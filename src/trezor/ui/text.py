@@ -1,3 +1,4 @@
+from typing import Union
 from micropython import const
 from trezor import ui
 
@@ -8,12 +9,15 @@ TEXT_MARGIN_LEFT = const(10)
 
 class Text(ui.Widget):
 
-    def __init__(self, header_text, header_icon, *content):
+    def __init__(self,
+                 header_text: str,
+                 header_icon: str,
+                 *content: Union[str, int]) -> None:
         self.header_text = header_text
         self.header_icon = header_icon
         self.content = content
 
-    def render(self):
+    def render(self) -> None:
         offset_x = TEXT_MARGIN_LEFT
         offset_y = TEXT_LINE_HEIGHT + TEXT_HEADER_HEIGHT
         style = ui.NORMAL

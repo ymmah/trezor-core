@@ -1,3 +1,5 @@
+from typing import Any
+
 
 def int_to_bytes(x: int) -> bytes:
     if x == 0:
@@ -20,7 +22,7 @@ def encode_length(l: int, is_list: bool) -> bytes:
         raise ValueError('Input too long')
 
 
-def encode(data) -> bytes:
+def encode(data: Any) -> bytes:
     if isinstance(data, int):
         return encode(int_to_bytes(data))
     if isinstance(data, bytes):

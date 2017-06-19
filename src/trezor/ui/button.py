@@ -1,3 +1,4 @@
+from typing import *
 from micropython import const
 from trezor import ui, loop
 from . import display, in_area, rotate_coords, Widget
@@ -80,11 +81,13 @@ BTN_DISABLED = const(8)
 
 class Button(Widget):
 
-    def __init__(self, area, content,
-                 normal_style=None,
-                 active_style=None,
-                 disabled_style=None,
-                 absolute=False):
+    def __init__(self,
+                 area: Tuple[int, int, int, int],
+                 content: str,
+                 normal_style: Dict = None,
+                 active_style: Dict = None,
+                 disabled_style: Dict = None,
+                 absolute: bool = False) -> None:
         self.area = area
         self.content = content
         self.normal_style = normal_style or DEFAULT_BUTTON
@@ -93,17 +96,17 @@ class Button(Widget):
         self.absolute = absolute
         self.state = BTN_DIRTY
 
-    def enable(self):
+    def enable(self) -> None:
         self.state &= ~BTN_DISABLED
         self.state |= BTN_DIRTY
 
-    def disable(self):
+    def disable(self) -> None:
         self.state |= BTN_DISABLED | BTN_DIRTY
 
-    def taint(self):
+    def taint(self) -> None:
         self.state |= BTN_DIRTY
 
-    def render(self):
+    def render(self) -> None:
         if not self.state & BTN_DIRTY:
             return
         state = self.state & ~BTN_DIRTY
@@ -138,7 +141,7 @@ class Button(Widget):
 
         self.state = state
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: Tuple[int, int]) -> Optional[int]:
         if self.state & BTN_DISABLED:
             return
         if not self.absolute:

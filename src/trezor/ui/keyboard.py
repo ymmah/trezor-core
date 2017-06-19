@@ -1,3 +1,4 @@
+from typing import Generator, Iterable, Optional, Tuple
 from trezor import ui, res, loop
 from trezor.crypto import bip39
 from trezor.ui import display
@@ -17,7 +18,14 @@ KEY_BUTTON_ACTIVE = {
 }
 
 
-def cell_area(i, n_x=3, n_y=3, start_x=0, start_y=40, end_x=240, end_y=240 - 48, spacing=0):
+def cell_area(i: int,
+              n_x: int = 3,
+              n_y: int = 3,
+              start_x: int = 0,
+              start_y: int = 40,
+              end_x: int = ui.SCREEN,
+              end_y: int = ui.SCREEN - 48,
+              spacing: int = 0) -> Tuple[int, int, int, int]:
     w = (end_x - start_x) // n_x
     h = (end_y - start_y) // n_y
     x = (i % n_x) * w
@@ -25,7 +33,7 @@ def cell_area(i, n_x=3, n_y=3, start_x=0, start_y=40, end_x=240, end_y=240 - 48,
     return (x + start_x, y + start_y, w - spacing, h - spacing)
 
 
-def key_buttons():
+def key_buttons() -> Iterable[Button]:
     keys = ['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr', 'stu', 'vwx', 'yz']
     # keys = [' ', 'abc', 'def', 'ghi', 'jkl', 'mno', 'pqrs', 'tuv', 'wxyz']
     return [Button(cell_area(i), k,
@@ -33,7 +41,7 @@ def key_buttons():
                    active_style=KEY_BUTTON_ACTIVE) for i, k in enumerate(keys)]
 
 
-def compute_mask(text):
+def compute_mask(text: str) -> int:
     mask = 0
     for c in text:
         shift = ord(c) - 97  # ord('a') == 97
@@ -45,11 +53,11 @@ def compute_mask(text):
 
 class KeyboardMultiTap(ui.Widget):
 
-    def __init__(self, content=''):
+    def __init__(self, content: str = '') -> None:
         self.content = content
         self.sugg_mask = 0xffffffff
-        self.sugg_word = None
-        self.pending_button = None
+        self.sugg_word = None  # type: Optional[str]
+        self.pending_button = None  # type: Optional[Button]
         self.pending_index = 0
 
         self.key_buttons = key_buttons()
@@ -59,7 +67,7 @@ class KeyboardMultiTap(ui.Widget):
                                 normal_style=CLEAR_BUTTON,
                                 active_style=CLEAR_BUTTON_ACTIVE)
 
-    def render(self):
+    def render(self) -> None:
 
         # clear canvas under input line
         display.bar(0, 0, 205, 40, ui.BLACK)
@@ -90,7 +98,7 @@ class KeyboardMultiTap(ui.Widget):
         for btn in self.key_buttons:
             btn.render()
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: Tuple[int, int]) -> None:
         if self.bs_button.touch(event, pos) == BTN_CLICKED:
             self.content = self.content[:-1]
             self.pending_button = None
@@ -120,7 +128,7 @@ class KeyboardMultiTap(ui.Widget):
                     self.pending_index = 0
                 return
 
-    def _update_suggestion(self):
+    def _update_suggestion(self) -> None:
         if self.content:
             self.sugg_word = bip39.find_word(self.content)
             self.sugg_mask = bip39.complete_word(self.content)
@@ -128,14 +136,14 @@ class KeyboardMultiTap(ui.Widget):
             self.sugg_word = None
             self.sugg_mask = 0xffffffff
 
-    def _update_buttons(self):
+    def _update_buttons(self) -> None:
         for btn in self.key_buttons:
             if compute_mask(btn.content) & self.sugg_mask:
                 btn.enable()
             else:
                 btn.disable()
 
-    def __iter__(self):
+    def __iter__(self) -> Generator:
         timeout = loop.Sleep(1000 * 1000 * 1)
         touch = loop.Select(loop.TOUCH)
         wait = loop.Wait((touch, timeout))
@@ -152,7 +160,7 @@ class KeyboardMultiTap(ui.Widget):
                 self._update_buttons()
 
 
-def zoom_buttons(keys, upper=False):
+def zoom_buttons(keys: str, upper: bool = False) -> Iterable[Button]:
     n_x = len(keys)
     if upper:
         keys = keys + keys.upper()
@@ -164,18 +172,18 @@ def zoom_buttons(keys, upper=False):
 
 class KeyboardZooming(ui.Widget):
 
-    def __init__(self, content='', uppercase=True):
+    def __init__(self, content: str = '', uppercase: bool = True) -> None:
         self.content = content
         self.uppercase = uppercase
 
-        self.zoom_buttons = None
+        self.zoom_buttons = ()  # type: Iterable[Button]
         self.key_buttons = key_buttons()
         self.bs_button = Button((240 - 35, 5, 30, 30),
                                 res.load('trezor/res/pin_close.toig'),
                                 normal_style=CLEAR_BUTTON,
                                 active_style=CLEAR_BUTTON_ACTIVE)
 
-    def render(self):
+    def render(self) -> None:
         self.render_input()
         if self.zoom_buttons:
             for btn in self.zoom_buttons:
@@ -184,7 +192,7 @@ class KeyboardZooming(ui.Widget):
             for btn in self.key_buttons:
                 btn.render()
 
-    def render_input(self):
+    def render_input(self) -> None:
         if self.content:
             display.bar(0, 0, 200, 40, ui.BLACK)
         else:
@@ -193,27 +201,26 @@ class KeyboardZooming(ui.Widget):
         if self.content:
             self.bs_button.render()
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: Tuple[int, int]) -> None:
         if self.bs_button.touch(event, pos) == BTN_CLICKED:
             self.content = self.content[:-1]
             self.bs_button.taint()
-            return
-        if self.zoom_buttons:
-            return self.touch_zoom(event, pos)
+        elif self.zoom_buttons:
+            self.touch_zoom(event, pos)
         else:
-            return self.touch_keyboard(event, pos)
+            self.touch_keyboard(event, pos)
 
-    def touch_zoom(self, event, pos):
+    def touch_zoom(self, event: int, pos: Tuple[int, int]) -> None:
         for btn in self.zoom_buttons:
             if btn.touch(event, pos) == BTN_CLICKED:
                 self.content += btn.content
-                self.zoom_buttons = None
+                self.zoom_buttons = ()
                 for btn in self.key_buttons:
                     btn.taint()
                 self.bs_button.taint()
                 break
 
-    def touch_keyboard(self, event, pos):
+    def touch_keyboard(self, event: int, pos: Tuple[int, int]) -> None:
         for btn in self.key_buttons:
             if btn.touch(event, pos) == BTN_CLICKED:
                 self.zoom_buttons = zoom_buttons(btn.content, self.uppercase)
@@ -222,7 +229,7 @@ class KeyboardZooming(ui.Widget):
                 self.bs_button.taint()
                 break
 
-    def __iter__(self):
+    def __iter__(self) -> Generator:
         timeout = loop.Sleep(1000 * 1000 * 1)
         touch = loop.Select(loop.TOUCH)
         wait = loop.Wait((touch, timeout))
@@ -233,7 +240,7 @@ class KeyboardZooming(ui.Widget):
                 event, *pos = result
                 self.touch(event, pos)
             elif self.zoom_buttons:
-                self.zoom_buttons = None
+                self.zoom_buttons = ()
                 for btn in self.key_buttons:
                     btn.taint()
 

@@ -1,20 +1,22 @@
+from typing import *
+
 try:
     from .resources import resdata
 except ImportError:
-    resdata = None
+    resdata = {}
 
 
-def load(name):
+def load(name: str) -> bytes:
     '''
     Loads resource of a given name as bytes.
     '''
-    if resdata and name in resdata:
+    if name in resdata:
         return resdata[name]
-    with open(name, 'rb') as f:
+    with open(name, 'rb') as f:  # type: IO[bytes]
         return f.read()
 
 
-def gettext(message):
+def gettext(message: str) -> str:
     '''
     Returns localized string. This function is aliased to _.
     '''

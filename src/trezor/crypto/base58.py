@@ -13,6 +13,9 @@
 # This module adds shiny packaging and support for python3.
 #
 
+from typing import Callable
+
+
 # 58 character alphabet used
 _alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
@@ -64,14 +67,14 @@ def _dsha256_32(data: bytes) -> bytes:
     return sha256(sha256(data).digest()).digest()[:4]
 
 
-def encode_check(data: bytes, digestfunc=_dsha256_32) -> str:
+def encode_check(data: bytes, digestfunc: Callable[[bytes], bytes] = _dsha256_32) -> str:
     '''
     Convert bytes to base58 encoded string, append checksum.
     '''
     return encode(data + digestfunc(data))
 
 
-def decode_check(string: str, digestfunc=_dsha256_32) -> bytes:
+def decode_check(string: str, digestfunc: Callable[[bytes], bytes] = _dsha256_32) -> bytes:
     '''
     Convert base58 encoded string to bytes and verify checksum.
     '''

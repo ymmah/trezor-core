@@ -109,3 +109,6 @@ class Display:
         '''
         Saves current display contents to file filename.
         '''
+    FONT_MONO: int  # Normal-weight monotype font.
+    FONT_NORMAL: int  # Normal-weight proportional font.
+    FONT_BOLD: int  # Bold proportional font.

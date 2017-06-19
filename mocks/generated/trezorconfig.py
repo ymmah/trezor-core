@@ -6,7 +6,7 @@ class Config:
     Persistent key-value storage, with 16-bit keys and bytes values.
     '''
 
-    def __init__(self):
+    def __init__(self) -> None:
         '''
         Initializes the storage.
         '''

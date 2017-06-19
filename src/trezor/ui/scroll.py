@@ -3,7 +3,7 @@ from trezor import loop, ui
 from .swipe import Swipe, SWIPE_UP, SWIPE_DOWN
 
 
-async def change_page(page, page_count):
+async def change_page(page: int, page_count: int) -> int:
     while True:
         s = await Swipe()
         if s == SWIPE_UP and page < page_count - 1:
@@ -12,7 +12,7 @@ async def change_page(page, page_count):
             return page - 1  # scroll up
 
 
-async def paginate(render_page, page_count, page=0, *args):
+async def paginate(render_page, page_count: int, page: int = 0, *args):
     while True:
         changer = change_page(page, page_count)
         renderer = render_page(page, page_count, *args)
@@ -24,17 +24,17 @@ async def paginate(render_page, page_count, page=0, *args):
             return result
 
 
-async def animate_swipe():
+async def animate_swipe() -> None:
     await ui.animate_pulse(render_swipe_icon, ui.GREY, ui.DARK_GREY, speed=300000, delay=200000)
 
 
-def render_swipe_icon(fg):
+def render_swipe_icon(fg: int):
     ui.display.bar_radius(102, 214, 36, 4, fg, ui.BLACK, 2)
     ui.display.bar_radius(106, 222, 28, 4, fg, ui.BLACK, 2)
     ui.display.bar_radius(110, 230, 20, 4, fg, ui.BLACK, 2)
 
 
-def render_scrollbar(page, page_count):
+def render_scrollbar(page: int, page_count: int) -> None:
     screen_height = const(220)
     size = const(10)
 

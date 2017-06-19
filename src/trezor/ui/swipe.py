@@ -1,3 +1,4 @@
+from typing import *
 import utime
 from micropython import const
 from trezor import loop, ui
@@ -15,15 +16,17 @@ SWIPE_RIGHT = const(270)
 
 class Swipe(ui.Widget):
 
-    def __init__(self, area=None, absolute=False):
+    def __init__(self,
+                 area: Tuple[int, int, int, int]=None,
+                 absolute: bool = False) -> None:
         self.area = area or (0, 0, ui.SCREEN, ui.SCREEN)
         self.absolute = absolute
-        self.start_pos = None
-        self.start_time = 0
-        self.light_origin = None
+        self.start_pos = None  # type: Optional[Tuple[int, int]]
+        self.start_time = 0  # type: float
+        self.light_origin = ui.BACKLIGHT_NORMAL
         self.light_target = ui.BACKLIGHT_NONE
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: Tuple[int, int]) -> Optional[int]:
 
         if not self.absolute:
             pos = rotate_coords(pos)

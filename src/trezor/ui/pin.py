@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from micropython import const
 from trezor import ui, res
 from trezor.crypto import random
@@ -5,7 +6,7 @@ from trezor.ui import display
 from trezor.ui.button import Button, BTN_CLICKED, CLEAR_BUTTON, CLEAR_BUTTON_ACTIVE
 
 
-def digit_area(i):
+def digit_area(i: int) -> Tuple[int, int, int, int]:
     width = const(80)
     height = const(48)
     x = (i % 3) * width
@@ -15,7 +16,7 @@ def digit_area(i):
     return (x, y + 48, width - 1, height - 1)
 
 
-def generate_digits():
+def generate_digits() -> List[int]:
     digits = list(range(1, 10))  # 1-9
     random.shuffle(digits)
     return digits
@@ -23,7 +24,7 @@ def generate_digits():
 
 class PinMatrix(ui.Widget):
 
-    def __init__(self, label, pin=''):
+    def __init__(self, label: str, pin: str = '') -> None:
         self.label = label
         self.pin = pin
         self.digits = generate_digits()
@@ -39,7 +40,7 @@ class PinMatrix(ui.Widget):
                                    normal_style=CLEAR_BUTTON,
                                    active_style=CLEAR_BUTTON_ACTIVE)
 
-    def render(self):
+    def render(self) -> None:
 
         header = '*' * len(self.pin) if self.pin else self.label
 
@@ -67,7 +68,7 @@ class PinMatrix(ui.Widget):
         # display.bar(0, 95, 240, 2, ui.blend(ui.BLACK, ui.WHITE, 0.25))
         # display.bar(0, 142, 240, 2, ui.blend(ui.BLACK, ui.WHITE, 0.25))
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: Tuple[int, int]) -> None:
         if self.clear_button.touch(event, pos) == BTN_CLICKED:
             self.pin = ''
         for btn in self.pin_buttons:

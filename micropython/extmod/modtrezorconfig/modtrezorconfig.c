@@ -23,7 +23,7 @@ typedef struct _mp_obj_Config_t {
     mp_obj_base_t base;
 } mp_obj_Config_t;
 
-/// def __init__(self):
+/// def __init__(self) -> None:
 ///     '''
 ///     Initializes the storage.
 ///     '''

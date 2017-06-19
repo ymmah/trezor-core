@@ -150,6 +150,14 @@ STATIC mp_obj_t mod_trezorcrypto_AES___del__(mp_obj_t self) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_AES___del___obj, mod_trezorcrypto_AES___del__);
 
+/// ECB: int
+/// CBC: int
+/// CFB: int
+/// OFB: int
+/// CTR: int
+/// Encrypt: int
+/// Decrypt: int
+
 STATIC const mp_rom_map_elem_t mod_trezorcrypto_AES_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&mod_trezorcrypto_AES_update_obj) },
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&mod_trezorcrypto_AES___del___obj) },

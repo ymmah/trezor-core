@@ -15,6 +15,13 @@ class AES:
         '''
         Update AES context with data.
         '''
+    ECB: int
+    CBC: int
+    CFB: int
+    OFB: int
+    CTR: int
+    Encrypt: int
+    Decrypt: int
 
 # extmod/modtrezorcrypto/modtrezorcrypto-bip32.h
 class HDNode:
@@ -87,7 +94,7 @@ class Bip32:
     '''
     '''
 
-    def __init__(self):
+    def __init__(self) -> None:
         '''
         '''
 
@@ -106,7 +113,7 @@ class Bip39:
     '''
     '''
 
-    def __init__(self):
+    def __init__(self) -> None:
         '''
         '''
 

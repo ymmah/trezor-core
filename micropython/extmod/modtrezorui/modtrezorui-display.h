@@ -374,6 +374,10 @@ STATIC mp_obj_t mod_trezorui_Display_save(mp_obj_t self, mp_obj_t filename) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorui_Display_save_obj, mod_trezorui_Display_save);
 
+/// FONT_MONO: int  # Normal-weight monotype font.
+/// FONT_NORMAL: int  # Normal-weight proportional font.
+/// FONT_BOLD: int  # Bold proportional font.
+
 STATIC const mp_rom_map_elem_t mod_trezorui_Display_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&mod_trezorui_Display_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_refresh), MP_ROM_PTR(&mod_trezorui_Display_refresh_obj) },

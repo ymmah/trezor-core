@@ -16,7 +16,7 @@ typedef struct _mp_obj_Bip39_t {
     mp_obj_base_t base;
 } mp_obj_Bip39_t;
 
-/// def __init__(self):
+/// def __init__(self) -> None:
 ///     '''
 ///     '''
 STATIC mp_obj_t mod_trezorcrypto_Bip39_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {

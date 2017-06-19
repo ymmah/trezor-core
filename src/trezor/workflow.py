@@ -1,11 +1,12 @@
+from typing import Callable, Coroutine, List, Optional
 from trezor import log, loop, ui
 
-_started = []
-_default = None
-_default_genfunc = None
+_started = []  # type: List[Coroutine]
+_default = None  # type: Optional[Coroutine]
+_default_genfunc = None  # type: Optional[Callable[[], Coroutine]]
 
 
-def start_default(genfunc):
+def start_default(genfunc: Callable[[], Coroutine]) -> None:
     global _default
     global _default_genfunc
     _default_genfunc = genfunc
@@ -15,23 +16,23 @@ def start_default(genfunc):
     ui.display.backlight(ui.BACKLIGHT_NORMAL)
 
 
-def close_default():
+def close_default() -> None:
     global _default
-    log.info(__name__, 'close default %s', _default)
-    _default.close()
-    _default = None
-
-
-def start(workflow):
     if _default is not None:
-        close_default()
+        log.info(__name__, 'close default %s', _default)
+        _default.close()
+        _default = None
+
+
+def start(workflow: Coroutine) -> None:
+    close_default()
     _started.append(workflow)
     log.info(__name__, 'start %s', workflow)
-    loop.schedule_task(_watch(workflow))
+    loop.schedule_task(_wrap(workflow))  # type: ignore # FIXME: https://github.com/python/typing/issues/441
+
+
+async def _wrap(workflow: Coroutine):
     ui.display.backlight(ui.BACKLIGHT_NORMAL)
-
-
-async def _watch(workflow):
     try:
         return await workflow
     finally:

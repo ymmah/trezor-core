@@ -25,14 +25,12 @@ def split_to_parts(line, mod_desc=None):
         current_method = line[4:].split('(')[0]
 
         yield (current_package, "\n")
-
         if current_class is None:
             yield (current_package, '# ' + mod_desc + "\n")
         else:
             current_indent = 4
 
     line = current_indent * ' ' + line
-
     yield (current_package, line)
 
 
@@ -106,6 +104,7 @@ def clear_directory(top_dir):
                 pass
 
         os.rmdir(root)
+
 
 if __name__ == '__main__':
     clear_directory('../mocks/generated')

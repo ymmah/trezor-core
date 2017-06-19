@@ -47,6 +47,19 @@ test: ## run unit tests
 testpy: ## run selected unit tests from python-trezor
 	cd tests ; ./run_tests_python_trezor.sh
 
+mypy: ## run mypy on appplication sources
+	mypy --strict \
+		src/trezor/config.py \
+		src/trezor/io.py \
+		src/trezor/log.py \
+		src/trezor/loop.py \
+		src/trezor/main.py \
+		src/trezor/msg.py \
+		src/trezor/utils.py \
+		src/trezor/workflow.py \
+		src/trezor/crypto/*.py \
+		src/trezor/ui/*.py
+
 pylint: ## run pylint on application sources
 	pylint -E $(shell find src -name *.py)
 

@@ -8,6 +8,8 @@ See `schedule_task`, `run_forever`, and syscalls `Sleep`, `Select`, `Signal`
 and `Wait`.
 '''
 
+from typing import *
+
 import utime
 import utimeq
 from micropython import const
@@ -19,12 +21,13 @@ TOUCH_START = const(1)  # event
 TOUCH_MOVE = const(2)  # event
 TOUCH_END = const(4)  # event
 
-after_step_hook = None  # function, called after each task step
+# function, called after each task step
+after_step_hook = None  # type: Optional[Callable[[], Any]]
 
 _MAX_SELECT_DELAY = const(1000000)  # usec delay if queue is empty
 _MAX_QUEUE_SIZE = const(64)  # maximum number of scheduled tasks
 
-_paused_tasks = {}  # {message interface: [task]}
+_paused_tasks = {}  # type: Dict[int, List[Coroutine]]
 _scheduled_tasks = utimeq.utimeq(_MAX_QUEUE_SIZE)
 
 if __debug__:
@@ -35,7 +38,7 @@ if __debug__:
     log_delay_rb = array.array('i', [0] * log_delay_rb_len)
 
 
-def schedule_task(task, value=None, deadline=None):
+def schedule_task(task: Coroutine, value: Any = None, deadline: int = None) -> None:
     '''
     Schedule task to be executed with `value` on given `deadline` (in
     microseconds).  Does not start the event loop itself, see `run_forever`.
@@ -45,7 +48,7 @@ def schedule_task(task, value=None, deadline=None):
     _scheduled_tasks.push(deadline, task, value)
 
 
-def unschedule_task(task):
+def unschedule_task(task: Coroutine) -> None:
     '''
     Remove task from the time queue.  Cancels previous `schedule_task`.
     '''
@@ -59,20 +62,20 @@ def unschedule_task(task):
     _scheduled_tasks = queue_copy
 
 
-def _pause_task(task, iface):
+def _pause_task(task: Coroutine, iface: int) -> None:
     tasks = _paused_tasks.get(iface, None)
     if tasks is None:
         tasks = _paused_tasks[iface] = []
     tasks.append(task)
 
 
-def _unpause_task(task):
+def _unpause_task(task: Coroutine) -> None:
     for iface in _paused_tasks:
         if task in _paused_tasks[iface]:
             _paused_tasks[iface].remove(task)
 
 
-def run_forever():
+def run_forever() -> None:
     '''
     Loop forever, stepping through scheduled tasks and awaiting I/O events
     inbetween.  Use `schedule_task` first to add a coroutine to the task queue.
@@ -111,10 +114,10 @@ def run_forever():
                 _step_task(task_entry[1], task_entry[2])
 
 
-def _step_task(task, value):
+def _step_task(task: Coroutine, value: Any) -> None:
     try:
         if isinstance(value, Exception):
-            result = task.throw(value)
+            result = task.throw(value)  # type: ignore
         else:
             result = task.send(value)
     except StopIteration as e:
@@ -128,19 +131,24 @@ def _step_task(task, value):
             schedule_task(task)
         else:
             log.error(__name__, '%s is unknown syscall', result)
-        if after_step_hook:
+        if after_step_hook is not None:
             after_step_hook()
 
 
-class Syscall:
+class Syscall(Awaitable):
     '''
     When tasks want to perform any I/O, or do any sort of communication with the
     scheduler, they do so through instances of a class derived from `Syscall`.
     '''
 
-    def __iter__(self):
-        # support `yield from` or `await` on syscalls
+    def handle(self, task: Coroutine) -> None:
+        pass
+
+    def __iter__(self) -> Generator:
+        '''Support `yield from` or `await` on syscalls.'''
         return (yield self)
+
+    __await__ = __iter__
 
 
 class Sleep(Syscall):
@@ -154,10 +162,10 @@ class Sleep(Syscall):
         print('missed by %d us', utime.ticks_diff(utime.ticks_us(), planned))
     '''
 
-    def __init__(self, delay_us):
+    def __init__(self, delay_us: int) -> None:
         self.delay_us = delay_us
 
-    def handle(self, task):
+    def handle(self, task: Coroutine) -> None:
         deadline = utime.ticks_add(utime.ticks_us(), self.delay_us)
         schedule_task(task, deadline, deadline)
 
@@ -173,10 +181,10 @@ class Select(Syscall):
         event, x, y = await loop.Select(loop.TOUCH)  # await touch event
     '''
 
-    def __init__(self, msg_iface):
+    def __init__(self, msg_iface: int) -> None:
         self.msg_iface = msg_iface
 
-    def handle(self, task):
+    def handle(self, task: Coroutine) -> None:
         _pause_task(task, self.msg_iface)
 
 
@@ -198,19 +206,19 @@ class Signal(Syscall):
         # prints in the next iteration of the event loop
     '''
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.value = _NO_VALUE
-        self.task = None
+        self.task = None  # type: Optional[Coroutine]
 
-    def handle(self, task):
+    def handle(self, task: Coroutine) -> None:
         self.task = task
         self._deliver()
 
-    def send(self, value):
+    def send(self, value: Any) -> None:
         self.value = value
         self._deliver()
 
-    def _deliver(self):
+    def _deliver(self) -> None:
         if self.task is not None and self.value is not _NO_VALUE:
             schedule_task(self.task, self.value)
             self.task = None
@@ -241,29 +249,31 @@ class Wait(Syscall):
     `Wait.__iter__` for explanation.  Always use `await`.
     '''
 
-    def __init__(self, children, wait_for=1, exit_others=True):
+    def __init__(self, children: Iterable[Coroutine], wait_for: int = 1, exit_others: bool = True) -> None:
         self.children = children
         self.wait_for = wait_for
         self.exit_others = exit_others
-        self.scheduled = None
-        self.finished = None
-        self.callback = None
+        self.scheduled = []  # type: List[Coroutine]
+        self.finished = []  # type: List[Coroutine]
+        self.task = None  # type: Optional[Coroutine]
 
-    def handle(self, task):
-        self.callback = task
-        self.finished = []
-        self.scheduled = [self._wait(c) for c in self.children]
-        for ct in self.scheduled:
-            schedule_task(ct)
+    def handle(self, task: Coroutine) -> None:
+        self.task = task
+        self.finished.clear()
+        self.scheduled.clear()
+        for child in self.children:
+            child_task = self._wait(child)
+            self.scheduled.append(child_task)  # type: ignore # FIXME: https://github.com/python/typing/issues/441
+            schedule_task(child_task)  # type: ignore # FIXME: https://github.com/python/typing/issues/441
 
-    def exit(self):
+    def exit(self) -> None:
         for task in self.scheduled:
             if task not in self.finished:
                 _unpause_task(task)
                 unschedule_task(task)
                 task.close()
 
-    async def _wait(self, child):
+    async def _wait(self, child: Coroutine) -> None:
         try:
             result = await child
         except Exception as e:
@@ -271,14 +281,15 @@ class Wait(Syscall):
         else:
             self._finish(child, result)
 
-    def _finish(self, child, result):
+    def _finish(self, child: Coroutine, result: Any) -> None:
         self.finished.append(child)
         if self.wait_for == len(self.finished) or isinstance(result, Exception):
             if self.exit_others:
                 self.exit()
-            schedule_task(self.callback, result)
+            if self.task is not None:
+                schedule_task(self.task, result)
 
-    def __iter__(self):
+    def __iter__(self) -> Generator:
         try:
             return (yield self)
         except:
