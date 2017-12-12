@@ -35,10 +35,9 @@ def process_type(t, cls, msg_id, indexfile, is_upy):
             # TYPE_ENUM = 14
             type = 'p.UVarintType'
 
-        elif v.type in (17, 18):
-            # TYPE_SINT64 = 18
+        elif v.type in (17,):
             # TYPE_SINT32 = 17
-            type = 'p.VarintType'
+            type = 'p.Sint32Type'
 
         elif v.type == 9:
             # TYPE_STRING = 9
