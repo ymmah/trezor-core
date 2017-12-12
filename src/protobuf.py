@@ -32,7 +32,9 @@ async def load_uvarint(reader):
     shift = 0
     byte = 0x80
     while byte & 0x80:
-        await reader.areadinto(buffer)
+        if (await reader.areadinto(buffer)) == 0:
+            raise EOFError
+
         byte = buffer[0]
         result += (byte & 0x7F) << shift
         shift += 7
