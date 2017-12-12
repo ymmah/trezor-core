@@ -62,11 +62,12 @@ async def memory_stats(interval):
 
 
 def boot():
-    register(DebugLinkDecision, protobuf_workflow, dispatch_DebugLinkDecision)
-    register(DebugLinkGetState, protobuf_workflow, dispatch_DebugLinkGetState)
-    register(DebugLinkStop, protobuf_workflow, dispatch_DebugLinkStop)
-    register(DebugLinkMemoryRead, protobuf_workflow, dispatch_DebugLinkMemoryRead)
-    register(DebugLinkMemoryWrite, protobuf_workflow, dispatch_DebugLinkMemoryWrite)
-    register(DebugLinkFlashErase, protobuf_workflow, dispatch_DebugLinkFlashErase)
+    if __debug__:
+        register(DebugLinkDecision, protobuf_workflow, dispatch_DebugLinkDecision)
+        register(DebugLinkGetState, protobuf_workflow, dispatch_DebugLinkGetState)
+        register(DebugLinkStop, protobuf_workflow, dispatch_DebugLinkStop)
+        register(DebugLinkMemoryRead, protobuf_workflow, dispatch_DebugLinkMemoryRead)
+        register(DebugLinkMemoryWrite, protobuf_workflow, dispatch_DebugLinkMemoryWrite)
+        register(DebugLinkFlashErase, protobuf_workflow, dispatch_DebugLinkFlashErase)
 
-    # loop.schedule(memory_stats(10))
+        # loop.schedule(memory_stats(10))
