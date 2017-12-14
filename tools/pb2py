@@ -12,7 +12,12 @@ from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
 def process_type(t, cls, msg_id, indexfile, is_upy):
     print("  * type %s" % t)
 
-    imports = []
+    if is_upy:
+        imports = ['import protobuf as p']
+    else:
+        imports = ['from __future__ import absolute_import',
+                   'from .. import protobuf as p']
+
     out = ["", "", "class %s(p.MessageType):" % t, ]
 
     if cls.DESCRIPTOR.fields_by_name:
