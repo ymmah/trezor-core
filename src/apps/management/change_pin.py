@@ -4,20 +4,20 @@ from trezor.pin import pin_to_int, show_pin_timeout
 from trezor.utils import unimport
 
 
-async def request_pin(ctx):
+async def request_pin(ctx, label: str=None):
     from trezor.messages.ButtonRequest import ButtonRequest
     from trezor.messages.wire_types import ButtonAck
     from apps.common.request_pin import request_pin
 
     await ctx.call(ButtonRequest(), ButtonAck)
 
-    return await request_pin()
+    return await request_pin(label)
 
 
 async def request_pin_confirm(ctx):
     while True:
-        pin1 = await request_pin(ctx)
-        pin2 = await request_pin(ctx)
+        pin1 = await request_pin(ctx, 'Enter new PIN')
+        pin2 = await request_pin(ctx, 'Enter PIN again')
         if pin1 == pin2:
             return pin1
         # TODO: display a message and wait
@@ -57,7 +57,7 @@ async def layout_change_pin(ctx, msg):
     await confirm_change_pin(ctx, msg)
 
     if config.has_pin():
-        curr_pin = await request_pin(ctx)
+        curr_pin = await request_pin(ctx, 'Enter current PIN')
     else:
         curr_pin = ''
     if msg.remove:

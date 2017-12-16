@@ -7,11 +7,12 @@ class PinCancelled(Exception):
 
 
 @ui.layout(delay=5000)
-async def request_pin(code: int = None, device_label: str = '') -> str:
+async def request_pin(label: str = None) -> str:
     from trezor.ui.confirm import ConfirmDialog, CONFIRMED
     from trezor.ui.pin import PinMatrix
 
-    label = _get_label(code, device_label)
+    if label is None:
+        label = 'Enter PIN'
 
     def onchange():
         c = dialog.cancel
@@ -39,19 +40,3 @@ async def request_pin(code: int = None, device_label: str = '') -> str:
             continue
         else:
             raise PinCancelled()
-
-
-def _get_label(code: int, device_label: str):
-    from trezor.messages import PinMatrixRequestType
-    if code is None:
-        code = PinMatrixRequestType.Current
-    if code == PinMatrixRequestType.NewFirst:
-        label = 'Enter new PIN'
-    elif code == PinMatrixRequestType.NewSecond:
-        label = 'Enter PIN again'
-    else:  # PinMatrixRequestType.Current
-        if device_label:
-            label = 'Unlock %s' % device_label
-        else:
-            label = 'Enter PIN'
-    return label

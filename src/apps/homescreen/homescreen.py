@@ -30,7 +30,7 @@ async def display_homescreen():
     if not image:
         image = res.load('apps/homescreen/res/homescreen.toif')
 
-    ui.display.bar(0, 0, ui.SCREEN, ui.SCREEN, ui.BG)
+    ui.display.clear()
     ui.display.avatar((ui.SCREEN - 144) // 2, (ui.SCREEN - 144) // 2 - 10, image, ui.WHITE, ui.BLACK)
     ui.display.text_center(ui.SCREEN // 2, ui.SCREEN - 20, label, ui.BOLD, ui.FG, ui.BG)
 

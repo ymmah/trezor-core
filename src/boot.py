@@ -11,7 +11,7 @@ async def unlock_layout():
     while True:
         try:
             if config.has_pin():
-                pin = await request_pin(None, 'My TREZOR') # FIXME
+                pin = await request_pin('Unlock My TREZOR') # FIXME
             else:
                 pin = ''
 
