@@ -10,7 +10,7 @@ default_handler = None
 def onstart(w):
     closedefault()
     started.append(w)
-    ui.display.backlight(ui.BACKLIGHT_NORMAL)
+    #ui.display.backlight(ui.BACKLIGHT_NORMAL)
     log.debug(__name__, 'onstart: %s', w)
 
 
@@ -39,5 +39,5 @@ def startdefault(handler):
         default_handler = handler
         default = handler()
         loop.schedule(default)
-        ui.display.backlight(ui.BACKLIGHT_NORMAL)
+        #ui.display.backlight(ui.BACKLIGHT_NORMAL)
         log.debug(__name__, 'startdefault')

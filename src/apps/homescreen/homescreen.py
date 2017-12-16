@@ -16,7 +16,7 @@ async def dim_screen():
         await loop.sleep(10000000)
 
 
-@ui.layout
+@ui.layout(delay=5000)
 async def display_homescreen():
     from apps.common import storage
 
@@ -34,7 +34,9 @@ async def display_homescreen():
     ui.display.avatar((ui.SCREEN - 144) // 2, (ui.SCREEN - 144) // 2 - 10, image, ui.WHITE, ui.BLACK)
     ui.display.text_center(ui.SCREEN // 2, ui.SCREEN - 20, label, ui.BOLD, ui.FG, ui.BG)
 
-    await dim_screen()
+    while True:
+        await loop.sleep(1000000)
+    #await dim_screen()
 
 
 @unimport

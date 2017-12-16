@@ -23,6 +23,6 @@ async def unlock_failed():
 
 
 config.init()
-ui.display.backlight(ui.BACKLIGHT_DIM)
+ui.display.backlight(ui.BACKLIGHT_NONE) # Bootloader ends faded out
 loop.schedule(unlock_layout())
 loop.run()

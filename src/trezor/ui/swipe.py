@@ -33,8 +33,8 @@ class Swipe(ui.Widget):
         self.directions = directions
         self.treshold = treshold
         self.start_pos = None
-        self.light_origin = None
-        self.light_target = ui.BACKLIGHT_NONE
+        #self.light_origin = None
+        #self.light_target = ui.BACKLIGHT_NONE
 
     def touch(self, event, pos):
 
@@ -47,6 +47,7 @@ class Swipe(ui.Widget):
 
             pdxa = abs(pdx)
             pdya = abs(pdy)
+            '''
             if pdxa > pdya and self.directions & SWIPE_HORIZONTAL:
                 # Horizontal direction
                 if (pdx > 0 and self.directions & SWIPE_RIGHT) or (pdx < 0 and self.directions & SWIPE_LEFT):
@@ -61,10 +62,10 @@ class Swipe(ui.Widget):
                         self.light_origin,
                         self.light_target,
                         pdya / _SWIPE_DISTANCE if pdya < _SWIPE_DISTANCE else 1))
-
+            '''
         elif event == io.TOUCH_START and contains(self.area, pos):
             self.start_pos = pos
-            self.light_origin = ui.BACKLIGHT_NORMAL
+            #self.light_origin = ui.BACKLIGHT_NORMAL
 
         elif event == io.TOUCH_END and self.start_pos is not None:
             pdx = pos[0] - self.start_pos[0]
@@ -89,4 +90,4 @@ class Swipe(ui.Widget):
                         return SWIPE_UP
             # No swipe, reset the state
             self.start_pos = None
-            ui.display.backlight(self.light_origin)
+            #ui.display.backlight(self.light_origin)

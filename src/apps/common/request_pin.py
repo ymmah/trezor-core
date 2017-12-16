@@ -6,7 +6,7 @@ class PinCancelled(Exception):
     pass
 
 
-@ui.layout
+@ui.layout(delay=5000)
 async def request_pin(code: int = None) -> str:
     from trezor.ui.confirm import ConfirmDialog, CONFIRMED
     from trezor.ui.pin import PinMatrix

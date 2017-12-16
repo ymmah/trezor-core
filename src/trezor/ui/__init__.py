@@ -9,6 +9,7 @@ from trezorui import Display
 from trezor import io
 from trezor import loop
 from trezor import res
+from trezor.utils import decorator_with_arguments
 
 display = Display()
 
@@ -90,18 +91,19 @@ async def backlight_slide(val: int, delay: int=20000, step: int=1):
         await sleep
 
 
-def layout(f):
-    delay = const(1000)
+@decorator_with_arguments
+def layout(f, delay=const(1000)):
     step = const(3)
 
     async def inner(*args, **kwargs):
-        await backlight_slide(BACKLIGHT_DIM, delay, step)
-        slide = backlight_slide(BACKLIGHT_NORMAL, delay, step)
+        #await backlight_slide(BACKLIGHT_DIM, delay, step)
+        #slide = backlight_slide(BACKLIGHT_NORMAL, delay, step)
         try:
-            loop.schedule(slide)
+            #loop.schedule(slide)
             return await f(*args, **kwargs)
         finally:
-            loop.close(slide)
+            pass
+            #loop.close(slide)
 
     return inner
 

@@ -54,3 +54,32 @@ def chunks(items, size):
 def ensure(cond):
     if not cond:
         raise AssertionError()
+
+
+def decorator_with_arguments(f):
+    '''
+        Allow to define decorators which may or may not accept arguments.
+
+        Let's define your decorator:
+            @decorator_with_arguments
+            def my_decorator(f, param='default'):
+                ...
+
+        Call it with default values:
+            @my_decorator
+            def my_function():
+                ...
+
+        Or call it with argument:
+            @my_decorator(param='customized')
+            def my_function():
+                ...
+    '''
+    def inner(*args, **kwargs):
+        if len(args) and callable(args[0]):
+            # When called without arguments
+            return f(*args)
+        else:
+            # When called with arguments
+            return lambda f2: f(f2, *args, **kwargs)
+    return inner
