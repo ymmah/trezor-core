@@ -8,15 +8,19 @@ from apps.common.request_pin import request_pin
 
 async def unlock_layout():
     while True:
-        if config.has_pin():
-            pin = await request_pin()
-        else:
-            pin = ''
-        if config.unlock(pin_to_int(pin), show_pin_timeout):
-            return
-        else:
-            await unlock_failed()
+        try:
+            if config.has_pin():
+                pin = await request_pin()
+            else:
+                pin = ''
 
+            if config.unlock(pin_to_int(pin), show_pin_timeout):
+                return
+            else:
+                await unlock_failed()
+
+        except:
+            pass
 
 async def unlock_failed():
     pass
