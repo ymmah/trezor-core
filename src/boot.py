@@ -7,10 +7,11 @@ from apps.common.request_pin import request_pin
 
 
 async def unlock_layout():
+
     while True:
         try:
             if config.has_pin():
-                pin = await request_pin()
+                pin = await request_pin(None, 'My TREZOR') # FIXME
             else:
                 pin = ''
 
@@ -28,5 +29,6 @@ async def unlock_failed():
 
 config.init()
 ui.display.backlight(ui.BACKLIGHT_NONE) # Bootloader ends faded out
+loop.schedule(ui.backlight_slide(ui.BACKLIGHT_NORMAL))
 loop.schedule(unlock_layout())
 loop.run()

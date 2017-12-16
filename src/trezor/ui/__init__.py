@@ -83,7 +83,7 @@ async def alert(count: int=3):
     display.backlight(current)
 
 
-async def backlight_slide(val: int, delay: int=20000, step: int=1):
+async def backlight_slide(val: int, delay: int=1000, step: int=1):
     sleep = loop.sleep(delay)
     current = display.backlight()
     for i in range(current, val, -step if current > val else step):

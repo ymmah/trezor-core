@@ -11,7 +11,7 @@ async def swipe_to_rotate():
 
 async def dim_screen():
     await loop.sleep(5 * 1000000)
-    await ui.backlight_slide(ui.BACKLIGHT_DIM)
+    await ui.backlight_slide(ui.BACKLIGHT_DIM, delay=20000)
     while True:
         await loop.sleep(10000000)
 
