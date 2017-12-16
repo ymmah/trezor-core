@@ -1,13 +1,10 @@
 from trezor import res
 from trezor import ui
-
-
-class PinCancelled(Exception):
-    pass
-
+from trezor import TrezorException
 
 @ui.layout(delay=5000)
 async def request_pin(label: str = None) -> str:
+    from trezor.messages.FailureType import PinCancelled
     from trezor.ui.confirm import ConfirmDialog, CONFIRMED
     from trezor.ui.pin import PinMatrix
 
@@ -39,4 +36,4 @@ async def request_pin(label: str = None) -> str:
             matrix.change('')
             continue
         else:
-            raise PinCancelled()
+            raise TrezorException(PinCancelled, 'PIN entry cancelled')

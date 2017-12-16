@@ -23,7 +23,7 @@ async def request_pin_confirm(ctx):
         # TODO: display a message and wait
 
 
-def confirm_change_pin(ctx, msg):
+def confirm_change_pin(ctx, msg: str):
     from apps.common.confirm import require_confirm
     from trezor.ui.text import Text
 
@@ -49,10 +49,10 @@ def confirm_change_pin(ctx, msg):
 
 
 @unimport
-async def layout_change_pin(ctx, msg):
+async def layout_change_pin(ctx, msg: str):
     from trezor.messages.Success import Success
     from trezor.messages.Failure import Failure
-    from trezor.messages.FailureType import PinInvalid
+    from trezor.messages.FailureType import PinCancelled
 
     await confirm_change_pin(ctx, msg)
 
@@ -71,4 +71,4 @@ async def layout_change_pin(ctx, msg):
         else:
             return Success(message='PIN removed')
     else:
-        return Failure(code=PinInvalid, message='PIN invalid')
+        return Failure(code=PinCancelled, message='PIN entry cancelled')
