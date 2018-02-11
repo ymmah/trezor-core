@@ -160,8 +160,10 @@ class Writer:
 
             if self.ofs == _REP_LEN:
                 # we are at the end of the report, flush it, and prepare header
-                await write
-                self.iface.write(self.data)
+                while True:
+                    await write
+                    if self.iface.write(self.data) >= 0:
+                        break
                 ustruct.pack_into(_REP_CONT, self.data, 0, _REP_MARKER_CONT,
                                   self.sid, self.seq)
                 self.ofs = _REP_CONT_DATA
@@ -178,8 +180,10 @@ class Writer:
                 self.data[self.ofs] = 0x00
                 self.ofs += 1
 
-            await loop.select(self.iface.iface_num() | io.POLL_WRITE)
-            self.iface.write(self.data)
+            while True:
+                await loop.select(self.iface.iface_num() | io.POLL_WRITE)
+                if self.iface.write(self.data) >= 0:
+                    break
 
 
 class SesssionSupervisor:
@@ -211,13 +215,17 @@ class SesssionSupervisor:
                 newsid = self.newsid()
                 self.open(newsid)
                 yield
-                await write
-                self.writeopen(newsid)
+                while True:
+                    await write
+                    if self.writeopen(newsid) >= 0:
+                        break
             elif repmarker == _REP_MARKER_CLOSE:
                 self.close(repsid)
                 yield
-                await write
-                self.writeclose(repsid)
+                while True:
+                    await write
+                    if self.writeclose(newsid) >= 0:
+                        break
 
     def open(self, sid):
         if sid not in self.handling_tasks:
@@ -237,8 +245,8 @@ class SesssionSupervisor:
 
     def writeopen(self, sid):
         ustruct.pack_into(_REP, self.session_report, 0, _REP_MARKER_OPEN, sid)
-        self.iface.write(self.session_report)
+        return self.iface.write(self.session_report)
 
     def writeclose(self, sid):
         ustruct.pack_into(_REP, self.session_report, 0, _REP_MARKER_CLOSE, sid)
-        self.iface.write(self.session_report)
+        return self.iface.write(self.session_report)
