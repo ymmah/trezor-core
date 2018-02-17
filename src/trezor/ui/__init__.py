@@ -13,9 +13,7 @@ from trezor import workflow
 
 display = Display()
 
-# for desktop platforms, we need to refresh the display after each frame
-if sys.platform != 'trezor':
-    loop.after_step_hook = display.refresh
+loop.after_step_hook = display.refresh
 
 # import constants from modtrezorui
 
