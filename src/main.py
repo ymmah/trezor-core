@@ -79,6 +79,7 @@ from apps import homescreen
 from apps import management
 from apps import wallet
 from apps import ethereum
+from apps import nem
 if __debug__:
     from apps import debug
 else:
@@ -89,6 +90,7 @@ homescreen.boot()
 management.boot()
 wallet.boot()
 ethereum.boot()
+nem.boot()
 if __debug__:
     debug.boot()
 else:
